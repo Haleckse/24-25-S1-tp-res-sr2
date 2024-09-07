@@ -1,0 +1,12 @@
+# MacOS files
+.DS_Store
+
+# Generated files
+bin/
+obj/
+log/
+perf.txt
+
+# Python virtual env
+venv/
+
