@@ -5,6 +5,7 @@
 bin/
 obj/
 log/
+fichiers/out.*
 perf.txt
 
 # Python virtual env
