@@ -68,10 +68,11 @@ void de_reseau(paquet_t *paquet);
  *********************************************************************/
 void depart_temporisateur_num(int n, int ms);
 
-/*********************************************************************
- * Démarre un temporisateur qui s'arrête après ms millisecondes      *
- * (ms doit être un multiple de 100)                                 *
- *********************************************************************/
+/***********************************************************************
+ * Démarre un temporisateur qui s'arrête après ms millisecondes.       *
+ * Valeur minimale : 20 ms (valeur conseillée en salle de TP : 100 ms) *
+ * (dans tous les cas ms doit être un multiple de 10)                  *
+ ***********************************************************************/
 void depart_temporisateur(int ms);
 
 /************************************
