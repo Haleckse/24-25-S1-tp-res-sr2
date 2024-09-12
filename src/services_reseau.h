@@ -62,14 +62,15 @@ void de_reseau(paquet_t *paquet);
 /* Fonctions utilitaires pour la gestion de temporisateurs */
 /* ======================================================= */
 
-/*********************************************************************
- * Démarre le temporisateur numéro n (0 <= n <= 31), qui s'arrêtera  *
- * après ms millisecondes (ms doit être un multiple de 100)          *
- *********************************************************************/
+/***********************************************************************
+ * Démarre le temporisateur numéro n (0 <= n <= 31), qui s'arrêtera    *
+ * après ms millisecondes (ms doit être un multiple de 10)             *
+ * Valeur minimale : 20 ms (valeur conseillée en salle de TP : 100 ms) *
+ ***********************************************************************/
 void depart_temporisateur_num(int n, int ms);
 
 /***********************************************************************
- * Démarre un temporisateur qui s'arrête après ms millisecondes.       *
+ * Démarre un temporisateur qui s'arrêtera après ms millisecondes.     *
  * Valeur minimale : 20 ms (valeur conseillée en salle de TP : 100 ms) *
  * (dans tous les cas ms doit être un multiple de 10)                  *
  ***********************************************************************/
