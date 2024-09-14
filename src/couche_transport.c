@@ -26,3 +26,19 @@ int dans_fenetre(unsigned int inf, unsigned int pointeur, int taille) {
         /* pointeur <= sup < inf */
         ( sup < inf && pointeur <= sup);
 }
+
+//fonctions maison
+
+uint8_t genererControle(paquet_t paquet){
+    uint8_t s = 0;
+    s = s^paquet.type^paquet.num_seq^paquet.lg_info; 
+    for (int i = 0; i < paquet.lg_info; i++){
+         s = s^paquet.info[i]; 
+        }
+    return s; 
+}
+
+int verifierControle(paquet_t paquet){
+    return paquet.somme_ctrl == genererControle(paquet); 
+}
+
