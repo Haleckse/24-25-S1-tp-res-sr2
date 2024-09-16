@@ -46,6 +46,7 @@ int dans_fenetre(unsigned int inf, unsigned int pointeur, int taille);
 
 uint8_t genererControle(paquet_t paquet); 
 int verifierControle(paquet_t paquet); 
+int incrementer(int n, int m); 
 
 
 

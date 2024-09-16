@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
         
         de_reseau(&reponse); 
 
-        prochainPaquet++; 
+        prochainPaquet = incrementer(prochainPaquet, 8); 
 
         /* lecture des donnees suivantes de la couche application */
         de_application(message, &taille_msg);

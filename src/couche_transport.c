@@ -42,3 +42,7 @@ int verifierControle(paquet_t paquet){
     return paquet.somme_ctrl == genererControle(paquet); 
 }
 
+int incrementer(int n, int m){
+    return (n+1)%m; 
+}
+

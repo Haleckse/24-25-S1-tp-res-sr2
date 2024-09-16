@@ -11,6 +11,7 @@
 #include "application.h"
 #include "couche_transport.h"
 #include "services_reseau.h"
+#define CAPA_SEQUENCE 16
 
 /* =============================== */
 /* Programme principal - récepteur */
@@ -20,6 +21,10 @@ int main(int argc, char* argv[])
     unsigned char message[MAX_INFO]; /* message pour l'application */
     paquet_t paquet, reponse; /* paquet utilisé par le protocole */
     int fin = 0; /* condition d'arrêt */
+
+    int curseur = 0; 
+    int borneInf = 0; 
+    int tailleFenetre; 
 
     init_reseau(RECEPTION);
 
@@ -34,6 +39,7 @@ int main(int argc, char* argv[])
         // attendre(); /* optionnel ici car de_reseau() fct bloquante */
         de_reseau(&paquet);
         printf("paquet attendu : %d paquet recu : %d\n", paquetAttendu, paquet.num_seq); 
+        
         if (verifierControle(paquet)){
             if(paquet.num_seq == paquetAttendu){
 
@@ -47,7 +53,7 @@ int main(int argc, char* argv[])
                 fin = vers_application(message, paquet.lg_info);
                 
                 //On incremente le paquet attendu suivant
-                paquetAttendu = incrementer(paquetAttendu, 8); 
+                paquetAttendu++; 
             }
             vers_reseau(&reponse); 
         }
