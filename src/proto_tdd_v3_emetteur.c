@@ -1,15 +1,16 @@
 #include <stdio.h>
+#include <string.h>
 #include "application.h"
 #include "couche_transport.h"
 #include "services_reseau.h"
+
 #define CAPA_SEQUENCE 16
 
 
 /* =============================== */
 /* Programme principal - émetteur  */
 /* =============================== */
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
 
     if(argc > 2){
         perror("Nombre de parametre incorect"); 
@@ -26,11 +27,9 @@ int main(int argc, char* argv[])
     paquet_t tabp[CAPA_SEQUENCE]; 
 
 
-    if(argv[1] != NULL){
-        if(argv[1] >= CAPA_SEQUENCE){
-        perror("W > N erreur"); 
-        }
-        else tailleFenetre = 4; 
+    if (tailleFenetre >= CAPA_SEQUENCE) {
+    perror("Erreur : la taille de la fenêtre ne peut pas être supérieure à la capacité de séquence.");
+    return 1;
     }
     
 
@@ -46,9 +45,9 @@ int main(int argc, char* argv[])
     while ( taille_msg != 0 ) {
         if(dans_fenetre(borneInf, curseur, tailleFenetre)){
             de_application(message, &taille_msg);
-            tabp[curseur].info = message; 
+            memcpy(tabp[curseur].info, message, taille_msg);
             tabp[curseur].type = DATA; 
-            tabp[curseur].ctrl = genererControle(tabp[curseur]); 
+            tabp[curseur].somme_ctrl = genererControle(tabp[curseur]); 
             vers_reseau(&tabp[curseur]); 
             if(curseur == borneInf){
                 depart_temporisateur(100); 
