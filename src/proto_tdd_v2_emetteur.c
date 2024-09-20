@@ -8,7 +8,7 @@
 // Un contrôle de flux en mode « Stop-and-Wait
 // Une détection d'erraeurs basée sur une somme de contrôle
 
-
+#include <stdlib.h>
 #include <stdio.h>
 #include "application.h"
 #include "couche_transport.h"
@@ -58,9 +58,12 @@ int main(int argc, char* argv[])
         depart_temporisateur(100);
 
         int evt = attendre(); 
+
+        int maxIter = 0; 
         // int timeout = 0; 
-        while(evt != -1){
-            
+        while(evt != -1 ){
+
+                if (maxIter >= 25) exit(0); 
 
                 vers_reseau(&paquet); 
                 
@@ -69,6 +72,8 @@ int main(int argc, char* argv[])
                 depart_temporisateur(100); 
 
                 evt = attendre(); 
+
+                maxIter++; 
         }
         
         arret_temporisateur(); 

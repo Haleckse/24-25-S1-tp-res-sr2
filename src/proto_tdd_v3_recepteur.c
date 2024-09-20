@@ -22,9 +22,7 @@ int main(int argc, char* argv[])
     paquet_t paquet, reponse; /* paquet utilisé par le protocole */
     int fin = 0; /* condition d'arrêt */
 
-    int curseur = 0; 
-    int borneInf = 0; 
-    int tailleFenetre; 
+    
 
     init_reseau(RECEPTION);
 
@@ -42,8 +40,12 @@ int main(int argc, char* argv[])
         
         if (verifierControle(paquet)){
             if(paquet.num_seq == paquetAttendu){
-
+                
+                printf("[TRP] pack recu sans erreurs.\n");
+                reponse.num_seq = paquetAttendu; 
                 reponse.type = ACK; 
+                reponse.lg_info = 0; 
+                reponse.somme_ctrl = genererControle(paquet); 
                  /* extraction des donnees du paquet recu */
                 for (int i=0; i<paquet.lg_info; i++) {
                     message[i] = paquet.info[i];
@@ -53,7 +55,7 @@ int main(int argc, char* argv[])
                 fin = vers_application(message, paquet.lg_info);
                 
                 //On incremente le paquet attendu suivant
-                paquetAttendu++; 
+                paquetAttendu = incrementer(paquetAttendu, 8); 
             }
             vers_reseau(&reponse); 
         }

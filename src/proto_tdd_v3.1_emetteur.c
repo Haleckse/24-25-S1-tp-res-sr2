@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "application.h"
 #include "couche_transport.h"
 #include "services_reseau.h"
@@ -12,6 +13,8 @@
 /* =============================== */
 int main(int argc, char* argv[]) {
 
+    int tailleFenetre; 
+
     if(argc > 2){
         perror("Nombre de parametre incorect"); 
         return 1; 
@@ -20,11 +23,16 @@ int main(int argc, char* argv[]) {
     
     unsigned char message[MAX_INFO]; /* message de l'application */
     int taille_msg, evenement; /* taille du message */
-    paquet_t paquet, reponse; /* paquet utilisé par le protocole */
+    paquet_t reponse; /* paquet utilisé par le protocole */
     int curseur = 0; 
     int borneInf = 0; 
-    int tailleFenetre = atoi(argv[1]); 
-    paquet_t tabp[CAPA_SEQUENCE]; 
+    paquet_t tabp[CAPA_SEQUENCE];
+    if(argc == 2){
+        tailleFenetre = atoi(argv[1]); 
+    } 
+    else{
+        tailleFenetre = 4; 
+    }
 
 
     if (tailleFenetre >= CAPA_SEQUENCE) {
@@ -44,15 +52,18 @@ int main(int argc, char* argv[]) {
     /* tant que l'émetteur a des données à envoyer */
     while ( taille_msg != 0 ) {
         if(dans_fenetre(borneInf, curseur, tailleFenetre)){
-            de_application(message, &taille_msg);
+            
             memcpy(tabp[curseur].info, message, taille_msg);
             tabp[curseur].type = DATA; 
             tabp[curseur].somme_ctrl = genererControle(tabp[curseur]); 
+            tabp[curseur].lg_info = taille_msg; 
             vers_reseau(&tabp[curseur]); 
             if(curseur == borneInf){
+                arret_temporisateur(); 
                 depart_temporisateur(100); 
             }
-            incrementer(curseur, CAPA_SEQUENCE);
+            incrementer(curseur, 8);
+            de_application(message, &taille_msg);
         }
         else{
             //Plus de credit, attente obligatoire
@@ -61,7 +72,7 @@ int main(int argc, char* argv[]) {
                 de_reseau(&reponse); 
                 if (verifierControle(reponse) && dans_fenetre(borneInf, reponse.num_seq, tailleFenetre)){
                     //On decale la fenetre
-                    borneInf = incrementer(reponse.num_seq, CAPA_SEQUENCE); 
+                    borneInf = incrementer(reponse.num_seq, 8); 
                     if(borneInf == curseur){
                         arret_temporisateur(); 
                     }
@@ -70,10 +81,11 @@ int main(int argc, char* argv[]) {
             else{
                 //timeout
                 int i = borneInf; 
+                arret_temporisateur();
                 depart_temporisateur(100); 
                 while(i != curseur){
                     vers_reseau(&tabp[i]); 
-                    i = incrementer(i, CAPA_SEQUENCE); 
+                    i = incrementer(i, 8); 
                 }
             }   
             
