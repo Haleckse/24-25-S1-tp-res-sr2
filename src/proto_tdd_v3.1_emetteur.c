@@ -54,6 +54,7 @@ int main(int argc, char* argv[]) {
         if(dans_fenetre(borneInf, curseur, tailleFenetre)){
             
             memcpy(tabp[curseur].info, message, taille_msg);
+            tabp[curseur].num_seq = curseur; 
             tabp[curseur].type = DATA; 
             tabp[curseur].somme_ctrl = genererControle(tabp[curseur]); 
             tabp[curseur].lg_info = taille_msg; 
@@ -62,7 +63,7 @@ int main(int argc, char* argv[]) {
                 arret_temporisateur(); 
                 depart_temporisateur(100); 
             }
-            incrementer(curseur, 8);
+            incrementer(curseur, 16);
             de_application(message, &taille_msg);
         }
         else{
@@ -72,7 +73,7 @@ int main(int argc, char* argv[]) {
                 de_reseau(&reponse); 
                 if (verifierControle(reponse) && dans_fenetre(borneInf, reponse.num_seq, tailleFenetre)){
                     //On decale la fenetre
-                    borneInf = incrementer(reponse.num_seq, 8); 
+                    borneInf = incrementer(reponse.num_seq, 16); 
                     if(borneInf == curseur){
                         arret_temporisateur(); 
                     }
@@ -85,7 +86,7 @@ int main(int argc, char* argv[]) {
                 depart_temporisateur(100); 
                 while(i != curseur){
                     vers_reseau(&tabp[i]); 
-                    i = incrementer(i, 8); 
+                    i = incrementer(i, 16); 
                 }
             }   
             

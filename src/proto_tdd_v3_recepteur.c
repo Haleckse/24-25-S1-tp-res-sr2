@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
         if (verifierControle(paquet)){
             if(paquet.num_seq == paquetAttendu){
                 
-                printf("[TRP] pack recu sans erreurs.\n");
+                printf("[TCP] pack recu sans erreurs.\n");
                 reponse.num_seq = paquetAttendu; 
                 reponse.type = ACK; 
                 reponse.lg_info = 0; 
