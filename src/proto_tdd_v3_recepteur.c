@@ -36,16 +36,17 @@ int main(int argc, char* argv[])
         
         // attendre(); /* optionnel ici car de_reseau() fct bloquante */
         de_reseau(&paquet);
-        printf("paquet attendu : %d paquet recu : %d\n", paquetAttendu, paquet.num_seq); 
+        
         
         if (verifierControle(paquet)){
             if(paquet.num_seq == paquetAttendu){
                 
+                printf("paquet attendu : %d paquet recu : %d\n", paquetAttendu, paquet.num_seq); 
                 printf("[TCP] pack recu sans erreurs.\n");
                 reponse.num_seq = paquetAttendu; 
                 reponse.type = ACK; 
                 reponse.lg_info = 0; 
-                reponse.somme_ctrl = genererControle(paquet); 
+                reponse.somme_ctrl = genererControle(reponse); 
                  /* extraction des donnees du paquet recu */
                 for (int i=0; i<paquet.lg_info; i++) {
                     message[i] = paquet.info[i];
@@ -55,7 +56,7 @@ int main(int argc, char* argv[])
                 fin = vers_application(message, paquet.lg_info);
                 
                 //On incremente le paquet attendu suivant
-                paquetAttendu = incrementer(paquetAttendu, 8); 
+                paquetAttendu = incrementer(paquetAttendu, 16); 
             }
             vers_reseau(&reponse); 
         }

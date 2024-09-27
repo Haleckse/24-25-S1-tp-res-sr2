@@ -50,29 +50,36 @@ int main(int argc, char* argv[]) {
     de_application(message, &taille_msg);
 
     /* tant que l'émetteur a des données à envoyer */
-    while ( taille_msg != 0 ) {
+    while ( (taille_msg != 0) || (curseur != borneInf)) {
         if(dans_fenetre(borneInf, curseur, tailleFenetre)){
             
             memcpy(tabp[curseur].info, message, taille_msg);
             tabp[curseur].num_seq = curseur; 
             tabp[curseur].type = DATA; 
-            tabp[curseur].somme_ctrl = genererControle(tabp[curseur]); 
             tabp[curseur].lg_info = taille_msg; 
+            tabp[curseur].somme_ctrl = genererControle(tabp[curseur]); 
+            
             vers_reseau(&tabp[curseur]); 
+            printf("PAQUET ENVOYE %d \n", curseur);
+
             if(curseur == borneInf){
-                arret_temporisateur(); 
+                // arret_temporisateur(); 
                 depart_temporisateur(100); 
             }
-            incrementer(curseur, 16);
+            curseur = incrementer(curseur, 16);
             de_application(message, &taille_msg);
+
+            
         }
         else{
             //Plus de credit, attente obligatoire
             evenement = attendre(); 
             if(evenement == -1){
                 de_reseau(&reponse); 
-                if (verifierControle(reponse) && dans_fenetre(borneInf, reponse.num_seq, tailleFenetre)){
+                printf("ACK %d recu avant verif\n", reponse.num_seq);
+                if (verifierControle(reponse)  && dans_fenetre(borneInf, reponse.num_seq, tailleFenetre)){
                     //On decale la fenetre
+                    printf("ACK %d recu \n", reponse.num_seq); 
                     borneInf = incrementer(reponse.num_seq, 16); 
                     if(borneInf == curseur){
                         arret_temporisateur(); 
@@ -82,7 +89,6 @@ int main(int argc, char* argv[]) {
             else{
                 //timeout
                 int i = borneInf; 
-                arret_temporisateur();
                 depart_temporisateur(100); 
                 while(i != curseur){
                     vers_reseau(&tabp[i]); 
@@ -92,6 +98,8 @@ int main(int argc, char* argv[]) {
             
         }
     }
+    
+
 
 
 
