@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 
     /* tant que l'émetteur a des données à envoyer */
     while ( (taille_msg != 0) || (curseur != borneInf)) {
-        if(dans_fenetre(borneInf, curseur, tailleFenetre)){
+        if( (dans_fenetre(borneInf, curseur, tailleFenetre)) && (taille_msg>0) ){
             
             memcpy(tabp[curseur].info, message, taille_msg);
             tabp[curseur].num_seq = curseur; 
