@@ -3,7 +3,7 @@ SYS = -std=gnu11 -Wall
 LIB = -lpthread
 
 # ============================= #
-NOM_ETU = NOM_PRENOM_A_CHANGER
+NOM_ETU = TSAN_ALEX
 # ============================= #
 
 SRCDIR = src

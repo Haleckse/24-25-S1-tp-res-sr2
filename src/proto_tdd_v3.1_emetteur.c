@@ -70,14 +70,14 @@ int main(int argc, char* argv[]) {
 
             // Si c'est le premier paquet de la fenêtre, démarrer le temporisateur
             if(curseur == borneInf){
-                depart_temporisateur(100); 
+                depart_temporisateur(200); 
             }
             // Incrémenter le curseur (modulo capacite de sequence)
             curseur = incrementer(curseur, 16);
-            de_application(message, &taille_msg);
 
-            
+            de_application(message, &taille_msg);
         }
+
         else{
             //Plus de credit, attente obligatoire
             evenement = attendre(); 
@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
             else{
                 //timeout : on restransler tous les paquets de la fenetre
                 int i = borneInf; 
-                depart_temporisateur(100); 
+                depart_temporisateur(200); 
                 while(i != curseur){
                     vers_reseau(&tabp[i]); 
                     i = incrementer(i, 16); 

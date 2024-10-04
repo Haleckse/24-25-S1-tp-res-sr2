@@ -39,6 +39,7 @@ int main(int argc, char* argv[])
         
         
         if (verifierControle(paquet)){
+            printf("VERIF CTRL OK\n");
             if(paquet.num_seq == paquetAttendu){
                 
                 printf("paquet attendu : %d paquet recu : %d\n", paquetAttendu, paquet.num_seq); 
@@ -63,6 +64,11 @@ int main(int argc, char* argv[])
         
        
     }
+
+
+
+
+    
 
     printf("[TRP] Fin execution protocole transport.\n");
     return 0;

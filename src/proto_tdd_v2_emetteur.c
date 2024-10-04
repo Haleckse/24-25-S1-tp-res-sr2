@@ -62,17 +62,11 @@ int main(int argc, char* argv[])
         int maxIter = 0; 
         // int timeout = 0; 
         while(evt != -1 ){
-
                 if (maxIter >= 25) exit(0); 
-
                 vers_reseau(&paquet); 
-                
-                arret_temporisateur(); 
-                
+                arret_temporisateur();                
                 depart_temporisateur(100); 
-
                 evt = attendre(); 
-
                 maxIter++; 
         }
         
@@ -84,9 +78,6 @@ int main(int argc, char* argv[])
 
         /* lecture des donnees suivantes de la couche application */
         de_application(message, &taille_msg);
-
-        
-        
     }
 
     printf("[TRP] Fin execution protocole transfert de donnees (TDD).\n");
