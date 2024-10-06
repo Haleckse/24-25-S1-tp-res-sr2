@@ -61,14 +61,13 @@ int main(int argc, char* argv[])
             }
             vers_reseau(&reponse); 
         }
-        
-       
     }
 
-
-
-
-    
+    depart_temporisateur(1000); 
+    int evt = attendre(); 
+    if (evt == -1){
+        vers_reseau(&reponse); 
+    }
 
     printf("[TRP] Fin execution protocole transport.\n");
     return 0;
