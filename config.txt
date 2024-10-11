@@ -3,19 +3,14 @@
 
 # Fichiers pour application
 #---------------------------
-FICHIER_IN fichiers/in.txt
-FICHIER_OUT fichiers/out.txt
+FICHIER_IN fichiers/palmier.jpg
+FICHIER_OUT fichiers/out.jpg
 
 # Initialisation réseau
 #------------------------
 # Emetteur
-PROBA_PERTE_E 0.0
-PROBA_ERREUR_E 0.0
+PROBA_PERTE_E 0.1
+PROBA_ERREUR_E 0.05
 # Recepteur
-PROBA_PERTE_R 0.0
-PROBA_ERREUR_R 0.0
-BOOL_PERTE_LAST_ACK 0
-
-# Tracé courbe débit
-#--------------------
-# PERIODE_CALCUL_DEBIT 100
+PROBA_PERTE_R 0.1
+PROBA_ERREUR_R 0.05
