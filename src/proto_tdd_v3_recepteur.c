@@ -41,9 +41,9 @@ int main(int argc, char* argv[])
         if (verifierControle(paquet)){
             printf("VERIF CTRL OK\n");
             if(paquet.num_seq == paquetAttendu){
-                
                 printf("paquet attendu : %d paquet recu : %d\n", paquetAttendu, paquet.num_seq); 
                 printf("[TCP] pack recu sans erreurs.\n");
+                //Constructuon de l'ack
                 reponse.num_seq = paquetAttendu; 
                 reponse.type = ACK; 
                 reponse.lg_info = 0; 
@@ -63,6 +63,7 @@ int main(int argc, char* argv[])
         }
     }
 
+    //Si le dernier ack se perd, on attend une retransmission du dernier paquet de part du recepteur, et on l'acquitte
     depart_temporisateur(1000); 
     int evt = attendre(); 
     if (evt == -1){

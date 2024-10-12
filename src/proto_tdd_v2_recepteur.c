@@ -49,6 +49,7 @@ int main(int argc, char* argv[])
                 //On incremente le paquet attendu suivant
                 paquetAttendu = incrementer(paquetAttendu, 8); 
             }
+            //On envoie l'ack a l'emmeteur 
             vers_reseau(&reponse); 
         }
         

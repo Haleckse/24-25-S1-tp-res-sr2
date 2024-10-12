@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -7,7 +6,6 @@
 #include "services_reseau.h"
 
 #define CAPA_SEQUENCE 16
-
 
 
 /* =============================== */
@@ -28,8 +26,6 @@ int main(int argc, char* argv[]) {
     int taille_msg, evenement; /* taille du message */
     paquet_t reponse; /* paquet utilisé par le protocole */
 
-
-    int ackDup = 0;
     int curseur = 0; // Pointeur pour le prochain numéro de séquence à envoyer
     int borneInf = 0; // Borne inférieure de la fenêtre glissante (premier paquet non acquitté)
     paquet_t tabp[CAPA_SEQUENCE]; // Tableau de paquets envoyés mais non encore acquittés
@@ -98,28 +94,9 @@ int main(int argc, char* argv[]) {
                         arret_temporisateur(); 
                     }
                 }
-                
-                else if ( incrementer(reponse.num_seq, 16) == borneInf ){
-                ackDup++; 
-                // si on recoit 3 retransmission d'ack pour un meme paquet, on enclanche la procedure de fast retransmit
-                if(ackDup == 3){
-                    arret_temporisateur(); 
-                    //arret du temporisateur et retransmission de la fenetre
-                    int i = borneInf; 
-                    depart_temporisateur(100); 
-                    while(i != curseur){
-                    vers_reseau(&tabp[i]); 
-                    i = incrementer(i, 16); 
-                    }
-                    ackDup = 0; //on reinitialise le compteur d'acks dupliqués
-                }
-                
             }
-
-            }
-
             else{
-                //timeout : on restransme tous les paquets de la fenetre
+                //timeout : on restransler tous les paquets de la fenetre
                 int i = borneInf; 
                 depart_temporisateur(100); 
                 while(i != curseur){

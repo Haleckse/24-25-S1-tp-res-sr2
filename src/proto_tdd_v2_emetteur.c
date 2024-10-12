@@ -59,21 +59,23 @@ int main(int argc, char* argv[])
 
         int evt = attendre(); 
 
-        int maxIter = 0; 
-        // int timeout = 0; 
+        int iter = 0; 
+       // La variable iter est utilisée pour éviter des boucles infinies notamment lors de la perte du dernier ack si le compteur atteint 25, le programme se termine.
         while(evt != -1 ){
-                if (maxIter >= 25) exit(0); 
+                if (iter >= 25) exit(0); 
                 vers_reseau(&paquet); 
                 arret_temporisateur();                
                 depart_temporisateur(100); 
                 evt = attendre(); 
-                maxIter++; 
+                iter++; 
         }
         
         arret_temporisateur(); 
         
+        //On recupere l'ack envoye par le recpeteur depuis le reseau
         de_reseau(&reponse); 
 
+        //Le numero de sequence est incrementé de facon circulaire (dans le cas present de 0 a 7)
         prochainPaquet = incrementer(prochainPaquet, 8); 
 
         /* lecture des donnees suivantes de la couche application */
