@@ -66,6 +66,7 @@ int main(int argc, char* argv[]) {
             
             // Envoi du paquet vers le réseau
             vers_reseau(&tabp[curseur]); 
+            depart_temporisateur_num(curseur, 100); 
             printf("PAQUET ENVOYE %d \n", curseur);
 
             // Si c'est le premier paquet de la fenêtre, démarrer le temporisateur
@@ -89,7 +90,7 @@ int main(int argc, char* argv[]) {
                 if (verifierControle(reponse)  && dans_fenetre(borneInf, reponse.num_seq, tailleFenetre)){
                     //On decale la fenetre
                     printf("ACK %d recu \n", reponse.num_seq); 
-                    borneInf = incrementer(reponse.num_seq, 16); //on decale la borne inf de la fenetre
+                    if(reponse.num_seq == borneInf) borneInf = incrementer(reponse.num_seq, 16); //on decale la borne inf de la fenetre
                     if(borneInf == curseur){
                         arret_temporisateur(); 
                     }
@@ -97,12 +98,13 @@ int main(int argc, char* argv[]) {
             }
             else{
                 //timeout : on restransler tous les paquets de la fenetre
-                int i = borneInf; 
-                depart_temporisateur(100); 
-                while(i != curseur){
-                    vers_reseau(&tabp[i]); 
-                    i = incrementer(i, 16); 
-                }
+                // int i = borneInf; 
+                // depart_temporisateur(100); 
+                // while(i != curseur){
+                //     vers_reseau(&tabp[i]); 
+                //     i = incrementer(i, 16); 
+                // }
+                vers_reseau(&tabp[evenement]); 
             }   
             
         }
