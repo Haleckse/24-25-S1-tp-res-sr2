@@ -7,7 +7,6 @@
 
 #define CAPA_SEQUENCE 16
 
-
 /* =============================== */
 /* Programme principal - émetteur  */
 /* =============================== */
@@ -15,101 +14,91 @@ int main(int argc, char* argv[]) {
 
     int tailleFenetre; // Taille de la fenêtre glissante
 
-     // Vérification du nombre de paramètres
+    // Vérification du nombre de paramètres
     if(argc > 2){
-        perror("Nombre de parametre incorect"); 
-        return 1; 
+        perror("Nombre de paramètres incorrect");
+        return 1;
     }
 
-    
     unsigned char message[MAX_INFO]; /* message de l'application */
     int taille_msg, evenement; /* taille du message */
     paquet_t reponse; /* paquet utilisé par le protocole */
-
-    int curseur = 0; // Pointeur pour le prochain numéro de séquence à envoyer
+    
+    int curseur = 0; // Prochain numéro de séquence à envoyer
     int borneInf = 0; // Borne inférieure de la fenêtre glissante (premier paquet non acquitté)
+    int acquitte[CAPA_SEQUENCE] = {0}; // Tableau pour garder trace des paquets acquittés
     paquet_t tabp[CAPA_SEQUENCE]; // Tableau de paquets envoyés mais non encore acquittés
 
-    // Initialisation de la taille de la fenêtre glissante à partir de l'argument, sinon par défaut à 4
+    // Initialisation de la taille de la fenêtre glissante
     if(argc == 2){
-        tailleFenetre = atoi(argv[1]); 
-    } 
-    else{
-        tailleFenetre = 4; 
+        tailleFenetre = atoi(argv[1]);
+    } else {
+        tailleFenetre = 4;
     }
-
 
     if (tailleFenetre >= CAPA_SEQUENCE) {
-    perror("Erreur : la taille de la fenêtre ne peut pas être supérieure à la capacité de séquence.");
-    return 1;
+        perror("Erreur : la taille de la fenêtre ne peut pas être supérieure à la capacité de séquence.");
+        return 1;
     }
-    
 
     init_reseau(EMISSION);
+    printf("[TRP] Initialisation réseau : OK.\n");
+    printf("[TRP] Début exécution protocole transport.\n");
 
-    printf("[TRP] Initialisation reseau : OK.\n");
-    printf("[TRP] Debut execution protocole transport.\n");
-
-    /* lecture de donnees provenant de la couche application */
+    // Lecture des données provenant de la couche application
     de_application(message, &taille_msg);
 
-    /* tant que l'émetteur a des données à envoyer */
-    while ( (taille_msg != 0) || (curseur != borneInf)) {
-        if( (dans_fenetre(borneInf, curseur, tailleFenetre)) && (taille_msg>0) ){
-            
-            // Construction du paquet à partir des données de l'application
+    // Tant que l'émetteur a des données à envoyer ou des paquets non acquittés
+    while ((taille_msg != 0) || (borneInf != curseur)) {
+        if (dans_fenetre(borneInf, curseur, tailleFenetre) && taille_msg > 0) {
+
+            // Construction du paquet
             memcpy(tabp[curseur].info, message, taille_msg);
-            tabp[curseur].num_seq = curseur; 
-            tabp[curseur].type = DATA; 
-            tabp[curseur].lg_info = taille_msg; 
-            tabp[curseur].somme_ctrl = genererControle(tabp[curseur]); 
-            
+            tabp[curseur].num_seq = curseur;
+            tabp[curseur].type = DATA;
+            tabp[curseur].lg_info = taille_msg;
+            tabp[curseur].somme_ctrl = genererControle(tabp[curseur]);
+
             // Envoi du paquet vers le réseau
-            vers_reseau(&tabp[curseur]); 
-            depart_temporisateur_num(curseur, 100); 
-            printf("PAQUET ENVOYE %d \n", curseur);
+            vers_reseau(&tabp[curseur]);
+            depart_temporisateur_num(curseur, 100); // Démarrer un temporisateur pour chaque paquet
+            printf("PAQUET ENVOYÉ %d \n", curseur);
 
-            // Si c'est le premier paquet de la fenêtre, démarrer le temporisateur
-            if(curseur == borneInf){
-                depart_temporisateur(100); 
-            }
-            // Incrémenter le curseur (modulo capacite de sequence)
-            curseur = incrementer(curseur, 16);
-
+            // Lire le message suivant
             de_application(message, &taille_msg);
-        }
+            curseur = incrementer(curseur, CAPA_SEQUENCE); // Avancer modulo capacité de séquence
+        } else {
+            // Plus de credit, attente obligatoire
+            evenement = attendre();
+            if (evenement == -1) {
+                de_reseau(&reponse); // Récupérer l'ACK
 
-        else{
-            //Plus de credit, attente obligatoire
-            evenement = attendre(); 
-            if(evenement == -1){
-                de_reseau(&reponse); // Récupération du paquet ACK depuis le réseau
-                printf("ACK %d recu avant verif\n", reponse.num_seq);
+                // Vérifier le checksum de l'ACK et s'assurer qu'il est dans la fenêtre
+                if (verifierControle(reponse) && dans_fenetre(borneInf, reponse.num_seq, tailleFenetre)) {
+                    acquitte[reponse.num_seq] = 1; // Marquer le paquet comme acquitté
+                    printf("ACK %d reçu\n", reponse.num_seq);
 
-                //verif checksum ACK et on s'assure que celui ci est dans la fenetre
-                if (verifierControle(reponse)  && dans_fenetre(borneInf, reponse.num_seq, tailleFenetre)){
-                    //On decale la fenetre
-                    printf("ACK %d recu \n", reponse.num_seq); 
-                    if(reponse.num_seq == borneInf) borneInf = incrementer(reponse.num_seq, 16); //on decale la borne inf de la fenetre
-                    if(borneInf == curseur){
-                        arret_temporisateur(); 
+                    // Décaler la fenêtre si le premier paquet non acquitté est acquitté
+                    while (acquitte[borneInf] == 1) {
+                        acquitte[borneInf] = 0; // Réinitialiser l'état du paquet
+                        borneInf = incrementer(borneInf, CAPA_SEQUENCE); // Décaler la borne inférieure
                     }
-                }
-            }
-            else{
-                //timeout : on restransler tous les paquets de la fenetre
-                // int i = borneInf; 
-                // depart_temporisateur(100); 
-                // while(i != curseur){
-                //     vers_reseau(&tabp[i]); 
-                //     i = incrementer(i, 16); 
-                // }
-                vers_reseau(&tabp[evenement]); 
-            }   
+
+                    // Arrêter le temporisateur si tous les paquets de la fenêtre sont acquittés
+                    if (borneInf == curseur) {
+                        arret_temporisateur(); // Aucun paquet en attente
+                    }
             
+                }
+            } else {
+                // Timeout : retransmettre le paquet qui a expiré
+                printf("Timeout pour le paquet %d, retransmission.\n", evenement);
+                vers_reseau(&tabp[evenement]);
+                depart_temporisateur_num(evenement, 100); // Redémarrer le temporisateur pour ce paquet
+            }
         }
     }
-    
-    printf("[TRP] Fin execution protocole transfert de donnees (TDD).\n");
+
+    printf("[TRP] Fin exécution protocole transfert de données (TDD).\n");
     return 0;
 }

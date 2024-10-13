@@ -53,13 +53,14 @@ int main(int argc, char* argv[])
                 reponse.somme_ctrl = genererControle(reponse); 
                  /* extraction des donnees du paquet recu */
                 
-
+                //Si le paquet recu est hors sequence, on le bufferise
                 if( !(paquet.num_seq == borneInf) ){
+                    printf("Paquet %d recu hors sequence, bufferisé\n", paquet.num_seq);
                     buffer[paquet.num_seq] = paquet; 
                     paquets_bufferise[paquet.num_seq] = 1;
                 }
                 
-                //Si c'esst le paquet que l'on attend, (borne inf) alors on transmet tous les paquets du buffers sont transmis
+                //Si le paquet recu est en sequence, on le transmet a l'app ainsi que le contenu du buffer.
                 else {
                     unsigned char mess[MAX_INFO]; /* message pour l'application */
                     for (int i=0; i<paquet.lg_info; i++) {
@@ -67,7 +68,8 @@ int main(int argc, char* argv[])
                         }   
                     fin = vers_application(mess, paquet.lg_info);
                     paquets_bufferise[borneInf] = 0; // Libérer le tampon
-                    incrementer(borneInf, CAPA_SEQUENCE); // Avancer la borne inférieure
+
+                    borneInf = incrementer(borneInf, CAPA_SEQUENCE); // Avancer la borne inférieure
                 
 
                     //On transmet a l'app le contenu du buffer
@@ -81,7 +83,7 @@ int main(int argc, char* argv[])
                         }   
                         fin = vers_application(message, p.lg_info);
                         paquets_bufferise[borneInf] = 0; // Libérer le tampon
-                        incrementer(borneInf, CAPA_SEQUENCE); // Avancer la borne inférieure
+                        borneInf = incrementer(borneInf, CAPA_SEQUENCE); // Avancer la borne inférieure
                     }
                 }
 
