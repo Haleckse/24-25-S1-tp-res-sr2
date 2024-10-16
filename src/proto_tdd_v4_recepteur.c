@@ -8,6 +8,8 @@
 **************************************************************/
 
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include "application.h"
 #include "couche_transport.h"
 #include "services_reseau.h"
@@ -18,15 +20,28 @@
 /* =============================== */
 int main(int argc, char* argv[])
 {
+
+    int tailleFenetre; 
+    // Initialisation de la taille de la fenêtre glissante
+    if(argc == 2){
+        tailleFenetre = atoi(argv[1]);
+    } else {
+        tailleFenetre = 4;
+    }
+
+    if (tailleFenetre >= CAPA_SEQUENCE) {
+        perror("Erreur : la taille de la fenêtre ne peut pas être supérieure à la capacité de séquence.");
+        return 1;
+    }
     
     paquet_t paquet, reponse; /* paquet utilisé par le protocole */
     int fin = 0; /* condition d'arrêt */
 
-    int curseur = 0; // Pointeur pour le prochain numéro de séquence à envoyer
     int borneInf = 0; // Borne inférieure de la fenêtre glissante (premier paquet non acquitté)
-    int taille_fenetre = 4; 
-    int paquets_bufferise[CAPA_SEQUENCE] = {0};
+    int acquitte[CAPA_SEQUENCE] = {0}; 
     paquet_t buffer[CAPA_SEQUENCE]; 
+    unsigned char mess[MAX_INFO]; /* message pour l'application */
+
 
 
     init_reseau(RECEPTION);
@@ -42,9 +57,9 @@ int main(int argc, char* argv[])
         de_reseau(&paquet);
         
         
-        if (verifierControle(paquet)){
+        if (verifierControle(paquet)){ //verif checksum 
             printf("VERIF CTRL OK\n");
-            if(dans_fenetre(borneInf, paquet.num_seq, taille_fenetre)){
+            if(dans_fenetre(borneInf, paquet.num_seq, tailleFenetre)){ //verif que le paquet est dans la fenetre
                 printf("[TCP] pack recu sans erreurs.\n");
                 //Constructuon de l'ack
                 reponse.num_seq = paquet.num_seq; 
@@ -53,49 +68,40 @@ int main(int argc, char* argv[])
                 reponse.somme_ctrl = genererControle(reponse); 
                  /* extraction des donnees du paquet recu */
                 
-                //Si le paquet recu est hors sequence, on le bufferise
-                if( !(paquet.num_seq == borneInf) ){
+                //Si le paquet recu est hors sequence, on le bufferise et on l'ajoute a la liste des prochain paquet a acquiter
+                if( !(paquet.num_seq == borneInf) ){ 
                     printf("Paquet %d recu hors sequence, bufferisé\n", paquet.num_seq);
                     buffer[paquet.num_seq] = paquet; 
-                    paquets_bufferise[paquet.num_seq] = 1;
+                    acquitte[paquet.num_seq] = 1;
                 }
                 
                 //Si le paquet recu est en sequence, on le transmet a l'app ainsi que le contenu du buffer.
                 else {
-                    unsigned char mess[MAX_INFO]; /* message pour l'application */
-                    for (int i=0; i<paquet.lg_info; i++) {
-                            mess[i] = paquet.info[i];
+                    buffer[borneInf] = paquet; 
+                    do{
+                    for (int i=0; i<buffer[borneInf].lg_info; i++) { 
+                            mess[i] = buffer[borneInf].info[i];
                         }   
-                    fin = vers_application(mess, paquet.lg_info);
-                    paquets_bufferise[borneInf] = 0; // Libérer le tampon
+                    fin = vers_application(mess, buffer[borneInf].lg_info);
+                    acquitte[borneInf] = 0; // Libérer le tampon
 
                     borneInf = incrementer(borneInf, CAPA_SEQUENCE); // Avancer la borne inférieure
-                
-
-                    //On transmet a l'app le contenu du buffer
-                    while (paquets_bufferise[borneInf]){
-                        
-                        paquet_t p = buffer[borneInf];
-
-                        unsigned char message[MAX_INFO]; /* message pour l'application */
-                        for (int i=0; i<p.lg_info; i++) {
-                            message[i] = p.info[i];
-                        }   
-                        fin = vers_application(message, p.lg_info);
-                        paquets_bufferise[borneInf] = 0; // Libérer le tampon
-                        borneInf = incrementer(borneInf, CAPA_SEQUENCE); // Avancer la borne inférieure
-                    }
+                   
+                    } while( acquitte[borneInf] != 0 ); 
+                   
                 }
 
-                // else{
-                //     buffer[paquet.num_seq] = paquet; 
-                // }
             }
+            reponse.num_seq = paquet.num_seq; 
+            reponse.type = ACK; 
+            reponse.somme_ctrl = genererControle(reponse); 
             vers_reseau(&reponse); 
         }
+        
     }
 
     //Si le dernier ack se perd, on attend une retransmission du dernier paquet de part du recepteur, et on l'acquitte
+    
     depart_temporisateur(1000); 
     int evt = attendre(); 
     if (evt == -1){
