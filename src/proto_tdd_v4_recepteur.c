@@ -1,8 +1,8 @@
 /*************************************************************
-* proto_tdd_v0 -  récepteur                                  *
-* TRANSFERT DE DONNEES  v2                                   *
+* proto_tdd_v4 -  récepteur                                  *
+* TRANSFERT DE DONNEES  v4                                   *
 *                                                            *
-* Protocole sans contrôle de flux, sans reprise sur erreurs  *
+* Slective repeat                                            *
 *                                                            *
 * E. Lavinal - Univ. de Toulouse III - Paul Sabatier         *
 **************************************************************/
@@ -80,9 +80,9 @@ int main(int argc, char* argv[])
                     buffer[borneInf] = paquet; 
                     do{
                     for (int i=0; i<buffer[borneInf].lg_info; i++) { 
-                            mess[i] = buffer[borneInf].info[i];
+                            mess[i] = buffer[borneInf].info[i]; //constructuction des messages
                         }   
-                    fin = vers_application(mess, buffer[borneInf].lg_info);
+                    fin = vers_application(mess, buffer[borneInf].lg_info); //on transmet a l'application
                     acquitte[borneInf] = 0; // Libérer le tampon
 
                     borneInf = incrementer(borneInf, CAPA_SEQUENCE); // Avancer la borne inférieure
@@ -92,6 +92,7 @@ int main(int argc, char* argv[])
                 }
 
             }
+            //contruction de l'ack
             reponse.num_seq = paquet.num_seq; 
             reponse.type = ACK; 
             reponse.somme_ctrl = genererControle(reponse); 
@@ -101,11 +102,10 @@ int main(int argc, char* argv[])
     }
 
     //Si le dernier ack se perd, on attend une retransmission du dernier paquet de part du recepteur, et on l'acquitte
-    
     depart_temporisateur(1000); 
-    int evt = attendre(); 
+    int evt = attendre();  //on a recu le dernier paquet
     if (evt == -1){
-        vers_reseau(&reponse); 
+        vers_reseau(&reponse); //on l'acquitte
     }
 
     printf("[TRP] Fin execution protocole transport.\n");

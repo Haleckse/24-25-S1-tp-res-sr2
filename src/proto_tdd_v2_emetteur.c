@@ -1,6 +1,6 @@
 /*************************************************************
-* proto_tdd_v0 -  émetteur                                   *
-* TRANSFERT DE DONNEES  v1                                   *
+* proto_tdd_v2 -  émetteur                                   *
+* TRANSFERT DE DONNEES  v2                                   *
 *                                                            *
 * E. Lavinal - Univ. de Toulouse III - Paul Sabatier         *
 **************************************************************/

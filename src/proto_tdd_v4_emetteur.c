@@ -1,3 +1,12 @@
+/*************************************************************
+* proto_tdd_v4 -  emetteur                                  *
+* TRANSFERT DE DONNEES  v4                                   *
+*                                                            *
+* Protocole sans contrôle de flux, sans reprise sur erreurs  *
+*                                                            *
+* E. Lavinal - Univ. de Toulouse III - Paul Sabatier         *
+**************************************************************/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -7,7 +16,7 @@
 
 #define CAPA_SEQUENCE 16
 #define paquetRecu 0
-#define maxRetransmit 25
+#define maxRetransmit 20
 
 /* =============================== */
 /* Programme principal - émetteur  */
@@ -26,7 +35,6 @@ int main(int argc, char* argv[]) {
     int taille_msg, evenement; /* taille du message */
     paquet_t reponse; /* paquet utilisé par le protocole */
     
-    int compt = 0; 
     int curseur = 0; // Prochain numéro de séquence à envoyer
     int borneInf = 0; // Borne inférieure de la fenêtre glissante (premier paquet non acquitté)
     int acquitte[CAPA_SEQUENCE] = {0}; // Tableau pour garder trace des paquets acquittés
@@ -55,8 +63,6 @@ int main(int argc, char* argv[]) {
     // Tant que l'émetteur a des données à envoyer ou des paquets non acquittés
     while ( (retransmis[borneInf] < maxRetransmit) && ( (taille_msg != 0) || (borneInf != curseur)) ) {  
         if (dans_fenetre(borneInf, curseur, tailleFenetre) && taille_msg > 0) {
-            if (compt > 500) break; 
-            compt++; 
 
             // Construction du paquet
             memcpy(tabp[curseur].info, message, taille_msg);
@@ -79,7 +85,7 @@ int main(int argc, char* argv[]) {
         else {
             // Plus de crédit, attente obligatoire
             evenement = attendre();
-            if (evenement == -1) {
+            if (evenement == -1) { //un paquet est arrive
                 de_reseau(&reponse); // Récupérer l'ACK
 
                 // Vérifier le checksum de l'ACK et s'assurer qu'il est dans la fenêtre
@@ -88,10 +94,13 @@ int main(int argc, char* argv[]) {
                     arret_temporisateur_num(reponse.num_seq); 
                     printf("ACK %d reçu\n", reponse.num_seq);
                     if(reponse.num_seq == borneInf){ //on peut decaler la fenetre
-                    do {
+                    
+                    acquitte[borneInf] = 0; 
+                    borneInf = incrementer(borneInf, CAPA_SEQUENCE); 
+                    while (acquitte[borneInf] == 1){
                         acquitte[borneInf] = 0; 
                         borneInf = incrementer(borneInf, CAPA_SEQUENCE); 
-                    } while (acquitte[borneInf] == 1); 
+                    } 
 
                 }
 

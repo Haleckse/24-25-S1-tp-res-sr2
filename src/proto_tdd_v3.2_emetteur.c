@@ -1,3 +1,11 @@
+/*************************************************************
+* proto_tdd_v3.2 -  emetteur                                 *
+* TRANSFERT DE DONNEES  v3.2                                 *
+*                                                            *
+* Protocole go back n avec fast retransmit                   *
+*                                                            *
+* E. Lavinal - Univ. de Toulouse III - Paul Sabatier         *
+**************************************************************/
 
 #include <stdio.h>
 #include <string.h>

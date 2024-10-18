@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "services_reseau.h": "c"
+        "services_reseau.h": "c",
+        "couche_transport.h": "c"
     }
 }

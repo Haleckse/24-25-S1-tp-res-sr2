@@ -1,8 +1,7 @@
 /*************************************************************
-* proto_tdd_v0 -  récepteur                                  *
+* proto_tdd_v2 -  récepteur                                  *
 * TRANSFERT DE DONNEES  v2                                   *
 *                                                            *
-* Protocole sans contrôle de flux, sans reprise sur erreurs  *
 *                                                            *
 * E. Lavinal - Univ. de Toulouse III - Paul Sabatier         *
 **************************************************************/

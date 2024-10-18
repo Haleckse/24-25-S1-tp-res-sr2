@@ -1,3 +1,12 @@
+/*************************************************************
+* proto_tdd_v3.1 -  emetteur                                 *
+* TRANSFERT DE DONNEES  v3.1                                 *
+*                                                            *
+* Proctole go back n                                         *
+*                                                            *
+* E. Lavinal - Univ. de Toulouse III - Paul Sabatier         *
+**************************************************************/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

@@ -1,8 +1,8 @@
 /*************************************************************
-* proto_tdd_v0 -  récepteur                                  *
-* TRANSFERT DE DONNEES  v2                                   *
+* proto_tdd_v3 -  récepteur                                  *
+* TRANSFERT DE DONNEES  v3                                   *
 *                                                            *
-* Protocole sans contrôle de flux, sans reprise sur erreurs  *
+* protocole go back n                                        *
 *                                                            *
 * E. Lavinal - Univ. de Toulouse III - Paul Sabatier         *
 **************************************************************/
